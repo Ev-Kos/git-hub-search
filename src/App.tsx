@@ -1,31 +1,46 @@
 import { useState } from 'react';
-
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import styles from './app.module.css';
+import { Search } from './components/search/search';
+import { getRepositories } from './utils/api';
+import type { TRepository } from './utils/types';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<TRepository[]>([]);
+
+  console.log(error, searchResults)
+
+  const handleSearch = async () => {
+    if (!searchValue.trim()) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await getRepositories(searchValue)
+      
+      setSearchResults(response.items || []);
+    } catch (err) {
+        let errorMessage = 'Произошла ошибка при поиске';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+        setError(errorMessage);
+        setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </>
+    <main className={styles.app}>
+      <header className={styles.header}>
+        <h1>GitHub Search</h1>
+        <Search value={searchValue} setValue={setSearchValue} handleSearch={handleSearch} isLoading={isLoading} />
+      </header>
+    </main>
   );
 }
 
