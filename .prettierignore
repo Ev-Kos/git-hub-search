@@ -1,0 +1,11 @@
+/dist
+/node_modules
+/.cache
+/.git
+/.vscode
+/coverage
+/public
+/build
+*.md
+*.svg
+*.log

@@ -1,0 +1,38 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-recess-order"],
+  "plugins": ["stylelint-use-nesting"],
+  "rules": {
+    "selector-class-pattern": null,
+    "keyframes-name-pattern": null,
+    "no-descending-specificity": null,
+    "color-function-notation": "modern",
+    "alpha-value-notation": "number",
+    "csstools/use-nesting": "always",
+    "function-url-quotes": "always",
+    "max-nesting-depth": 3,
+    "no-duplicate-selectors": true,
+    "declaration-block-no-redundant-longhand-properties": true,
+
+    "selector-max-id": null,
+
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["nest"]
+      }
+    ],
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": ["part"]
+      }
+    ],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ]
+  },
+  "ignoreFiles": ["**/node_modules/**", "**/dist/**", "**/public/**", "*.min.css"]
+}
