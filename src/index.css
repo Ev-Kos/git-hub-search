@@ -1,9 +1,19 @@
 :root {
   --color-text: #242424;
-  --color-primary-text: #ffffff;
+  --color-primary-text: #fff;
   --color-background: #f5f8fa;
-  --color-blue: #4181ac;
+  --color-blue-light: #4181ac;
   --color-violet: #5b479c;
+  --color-dark-violet: #3a2e5c;
+  --color-red: #c62828;
+  --color-black-transparent: rgb(0 0 0 / 0.1);
+  --color-gray: #586069;
+  --color-gray-light: #e1e4e8;
+  --color-filter-background: #f6f8fa;
+  --color-filter-border: #d1d5d8;
+  --color-border-spinner: #4e437633;
+  --color-blue: #0366d6;
+  --color-yellow: #f1e05a;
 }
 
 #root {
@@ -24,6 +34,8 @@ body {
 }
 
 h1,
+h2,
+h3,
 p,
 ul {
   padding: 0;

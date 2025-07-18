@@ -11,12 +11,9 @@ export default tseslint.config(
   {
     ignores: ['**/dist', 'node_modules'],
   },
-
-  // Исправлено: убраны неитерируемые элементы
   ...tseslint.configs.recommended,
   prettier,
 
-  // Настройки для React (TSX)
   {
     files: ['**/*.tsx'],
     plugins: {
@@ -53,7 +50,6 @@ export default tseslint.config(
     },
   },
 
-  // Общие правила для TypeScript (TS и TSX)
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {

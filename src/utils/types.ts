@@ -18,7 +18,7 @@ export type TOwner = {
   type: string;
   user_view_type: string;
   site_admin: boolean;
-}
+};
 
 export type TRepository = {
   id: number;
@@ -101,10 +101,10 @@ export type TRepository = {
   watchers: number;
   default_branch: string;
   score: number;
-}
+};
 
 export type TResponse = {
   total_count: number;
   incomplete_results: boolean;
   items: TRepository[];
-}
+};
