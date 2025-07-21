@@ -1,20 +1,21 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: var(--color-background);
 }
 
 .header {
-  padding: 24px;
+  padding: 2vh 5vw;
   color: var(--color-primary-text);
   text-align: center;
   background-color: var(--color-blue-light);
 }
 
 .error {
-  margin-top: 20px;
-  font-size: 16px;
+  margin-top: 1.5vh;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--color-red);
   text-align: center;
@@ -23,8 +24,10 @@
 
 .columns {
   display: flex;
-  gap: 25px;
-  padding: 2% 5%;
+  flex: 1;
+  gap: 4%;
+  min-height: 0;
+  padding: 2vh 5vw;
 }
 
 @keyframes fadeIn {

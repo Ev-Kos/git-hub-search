@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useState, type ChangeEvent, useCallback, useEffect, useRef } from 'react';
+import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 
 import styles from './app.module.css';
 import { Search } from './components/search/search';
-import { getRepositories, getReposity } from './utils/api';
+import { getRepositories } from './utils/api';
 import type { TRepository } from './utils/types';
 import { SearchResult } from './components/search-result/search-result';
-
-const PLACE = {
-  favorites: 'favorites',
-  search: 'search',
-};
+import { Favorites } from './components/favorites/favorites';
+import { PLACE } from './utils/constants';
+import { Modal } from './components/modal/modal';
 
 function App() {
   const [searchValue, setSearchValue] = useState('');
@@ -22,88 +19,131 @@ function App() {
   const [activeRepository, setActiveRepository] = useState<TRepository | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [favorites, setFavorites] = useState<TRepository[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  console.log(activeRepository, isModalOpen);
-
-  const searchRef = useRef<HTMLInputElement>(null);
-
+  const favoritesRef = useRef(favorites);
   useEffect(() => {
-    searchRef.current?.focus();
-  }, []);
+    favoritesRef.current = favorites;
+  }, [favorites]);
 
-  const handleSearch = async () => {
-    if (!searchValue.trim()) return;
+  const handleSearch = useCallback(
+    async (newPage: number = 1) => {
+      if (!searchValue.trim()) return;
 
-    setIsLoading(true);
-    setError(null);
+      const isFirstPage = newPage === 1;
 
-    try {
-      const response = await getRepositories(searchValue);
-      setSearchResults(response.items || []);
-      setSearchValue('');
-    } catch (err) {
-      let errorMessage = 'Произошла ошибка при поиске';
-      if (err instanceof Error) {
-        errorMessage = err.message;
+      if (isFirstPage) {
+        setIsLoading(true);
+        setSearchResults([]);
+        setFilterValue('');
+      } else {
+        setIsLoadingMore(true);
       }
-      setError(errorMessage);
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      setError(null);
+
+      try {
+        const response = await getRepositories(searchValue, newPage);
+
+        const filteredItems = response.items.filter(
+          (item) => !favoritesRef.current.some((fav) => fav.id === item.id),
+        );
+
+        if (isFirstPage) {
+          setSearchResults(filteredItems);
+        } else {
+          setSearchResults((prev) => [...prev, ...filteredItems]);
+        }
+
+        setHasMore((response.items || []).length === 30);
+        setPage(newPage);
+      } catch (err) {
+        let errorMessage = 'Произошла ошибка при поиске';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === 'string') {
+          errorMessage = err;
+        }
+        setError(errorMessage);
+
+        if (isFirstPage) {
+          setSearchResults([]);
+        }
+      } finally {
+        if (isFirstPage) {
+          setIsLoading(false);
+        } else {
+          setIsLoadingMore(false);
+        }
+      }
+    },
+    [searchValue],
+  );
 
   const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilterValue(e.target.value);
   };
 
-  const openModal = async (item: TRepository) => {
-    setIsLoading(true);
-    setError(null);
+  const openModal = useCallback((item: TRepository) => {
+    setActiveRepository(item);
+    setIsModalOpen(true);
+  }, []);
 
-    try {
-      // Если языки не загружены, делаем дополнительный запрос
-      if (!item.language) {
-        const response = await getReposity(item.owner.login, item.name);
-        setActiveRepository(response);
-      } else {
-        setActiveRepository(item);
-      }
-
-      setIsModalOpen(true);
-    } catch (err) {
-      let errorMessage = 'Не удалось загрузить данные репозитория';
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
-  const moveRepository = (id: number, source: string, place: string) => {
-    if (source === place) return;
+  const addToFavorites = useCallback((item: TRepository) => {
+    setSearchResults((prev) => prev.filter((el) => el.id !== item.id));
+    setFavorites((prev) => [...prev, item]);
+  }, []);
 
-    if (source === PLACE.search && place === PLACE.favorites) {
-      const repoToAdd = searchResults.find((item) => item.id === id);
-      if (repoToAdd && !favorites.some((item) => item.id === id)) {
-        setFavorites([...favorites, repoToAdd]);
+  const removeFromFavorites = useCallback((item: TRepository) => {
+    setFavorites((prev) => prev.filter((el) => el.id !== item.id));
+    setSearchResults((prev) => {
+      if (!prev.some((el) => el.id === item.id)) {
+        return [item, ...prev];
       }
-    } else if (source === PLACE.favorites && place === PLACE.search) {
-      setFavorites(favorites.filter((item) => item.id !== id));
+      return prev;
+    });
+  }, []);
+
+  const onLoadMore = useCallback(() => {
+    handleSearch(page + 1);
+  }, [handleSearch, page]);
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+
+    if (!destination) return;
+
+    if (source.droppableId === PLACE.search && destination.droppableId === PLACE.favorites) {
+      const item = searchResults[source.index];
+      if (item) {
+        setSearchResults((prev) => prev.filter((_, idx) => idx !== source.index));
+        setFavorites((prev) => [...prev, item]);
+      }
+    }
+
+    if (source.droppableId === PLACE.favorites && destination.droppableId === PLACE.favorites) {
+      if (source.index !== destination.index) {
+        setFavorites((prev) => {
+          const newFavorites = [...prev];
+          const [movedItem] = newFavorites.splice(source.index, 1);
+          newFavorites.splice(destination.index, 0, movedItem);
+          return newFavorites;
+        });
+      }
+    }
+
+    if (source.droppableId === PLACE.favorites && destination.droppableId === PLACE.search) {
+      const item = favorites[source.index];
+      if (item) {
+        removeFromFavorites(item);
+      }
     }
   };
-
-  const addToFavorites = (item: TRepository) => {
-    if (!favorites.some((el) => el.id === item.id)) {
-      setFavorites([...favorites, item]);
-    }
-  };
-
-  const filteredResults = searchResults.filter((item) =>
-    item.name.toLowerCase().includes(filterValue.toLowerCase()),
-  );
 
   return (
     <main className={styles.app}>
@@ -112,26 +152,46 @@ function App() {
         <Search
           value={searchValue}
           setValue={setSearchValue}
-          handleSearch={handleSearch}
+          handleSearch={() => handleSearch(1)}
           isLoading={isLoading}
-          ref={searchRef}
         />
       </header>
       {error && <p className={styles.error}>{error}</p>}
-      <DndProvider backend={HTML5Backend}>
+      <DragDropContext onDragEnd={onDragEnd}>
         <div className={styles.columns}>
           <SearchResult
             title="Результаты поиска"
             filterValue={filterValue}
             handleFilterChange={handleFilterChange}
             isLoading={isLoading}
-            results={filteredResults}
+            results={searchResults}
             openModal={openModal}
             addToFavorites={addToFavorites}
-            moveRepository={moveRepository}
+            removeFromFavorites={removeFromFavorites}
+            favorites={favorites}
+            searchValue={searchValue}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+            currentPage={page}
+          />
+          <Favorites
+            title="Избранное"
+            favorites={favorites}
+            openModal={openModal}
+            removeFromFavorites={removeFromFavorites}
           />
         </div>
-      </DndProvider>
+      </DragDropContext>
+      {isModalOpen && activeRepository && (
+        <Modal
+          item={activeRepository}
+          closeModal={closeModal}
+          isFavorite={favorites.some((fav) => fav.id === activeRepository.id)}
+          addToFavorites={addToFavorites}
+          removeFromFavorites={removeFromFavorites}
+        />
+      )}
     </main>
   );
 }

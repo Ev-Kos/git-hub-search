@@ -1,84 +1,49 @@
-import { useCallback, useRef, type KeyboardEvent } from 'react';
-import { useDrag } from 'react-dnd';
-import { FaStar, FaCodeBranch, FaRegBookmark } from 'react-icons/fa';
+import { memo, type KeyboardEvent } from 'react';
+import { FaStar, FaCodeBranch, FaRegBookmark, FaTimes } from 'react-icons/fa';
 
 import type { TRepository } from '../../utils/types';
+import { PLACE } from '../../utils/constants';
+import { Button } from '../button/button';
 
 import styles from './repository-item.module.css';
 
 type TRepositoryItemProps = {
   item: TRepository;
   type: string;
-  moveRepository: (id: number, source: string, place: string) => void;
   openModal: (item: TRepository) => void;
-  addToFavorites: (item: TRepository) => void;
+  onClick: (item: TRepository) => void;
 };
 
-type TDropResult = {
-  name: string;
-};
-
-export const RepositoryItem = ({
-  item,
-  type,
-  moveRepository,
-  openModal,
-  addToFavorites,
-}: TRepositoryItemProps) => {
-  const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: 'item',
-    item: { id: item.id, source: type },
-    end: (item, monitor) => {
-      const dropResult = monitor.getDropResult<TDropResult>();
-      if (item && dropResult) {
-        moveRepository(item.id, item.source, dropResult.name);
+export const RepositoryItem = memo(
+  ({ item, type, openModal, onClick }: TRepositoryItemProps) => {
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        openModal(item);
       }
-    },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  }));
+    };
 
-  const ref = useRef<HTMLDivElement>(null); // Изменён тип на HTMLDivElement
-
-  const setRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      ref.current = node;
-      dragRef(node);
-    },
-    [dragRef],
-  );
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      openModal(item);
-    }
-  };
-
-  return (
-    <li className={`${styles.item} ${isDragging ? styles.dragging : ''}`}>
+    return (
       <div
-        ref={setRef}
-        role="button"
-        tabIndex={0}
         className={styles.item_area}
         onClick={() => openModal(item)}
         onKeyDown={handleKeyDown}
-        aria-label={`Открыть детали репозитория ${item.name}`}
+        role="button"
+        tabIndex={0}
       >
         <div className={styles.item_header}>
           <h3 className={styles.item_name}>{item.name}</h3>
-          <button
-            className={styles.add_button}
+          <Button
+            type="button"
+            view="icon"
             onClick={(e) => {
               e.stopPropagation();
-              addToFavorites(item);
+              onClick(item);
             }}
             onKeyDown={(e) => e.stopPropagation()}
-            aria-label="Добавить в избранное"
+            aria-label={type === PLACE.favorites ? 'Удалить из избранного' : 'Добавить в избранное'}
           >
-            <FaRegBookmark />
-          </button>
+            {type === PLACE.favorites ? <FaTimes /> : <FaRegBookmark />}
+          </Button>
         </div>
 
         <p className={styles.description}>{item.description || 'Описание отсутствует'}</p>
@@ -102,6 +67,14 @@ export const RepositoryItem = ({
           )}
         </div>
       </div>
-    </li>
-  );
-};
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.item.id === nextProps.item.id &&
+      prevProps.type === nextProps.type &&
+      prevProps.openModal === nextProps.openModal &&
+      prevProps.onClick === nextProps.onClick
+    );
+  },
+);

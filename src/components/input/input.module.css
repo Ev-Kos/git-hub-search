@@ -1,23 +1,23 @@
-.form {
+.input_label {
+  position: relative;
   width: 100%;
-  max-width: 90vw;
-  margin: 1.5vh auto 0;
 }
 
-.input_wrap {
-  display: flex;
-  gap: 1.5vh;
-}
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 0.9rem;
+  border-radius: 0.25rem;
 
-.input_search {
-  padding: 1.2vh 2vw 1.2vh 1.5vw;
-  border: none;
+  &:focus {
+    outline: 2px solid var(--color-violet);
+  }
 }
 
 .clear_button {
   position: absolute;
-  top: 0;
-  right: 0.5vw;
+  top: 50%;
+  right: 0.3%;
   display: flex;
   align-items: center;
   justify-content: center;

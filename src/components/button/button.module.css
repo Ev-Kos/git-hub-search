@@ -1,0 +1,98 @@
+.button {
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.button_primary {
+  padding: 1vh 1.5vw;
+  font-size: 0.9rem;
+  color: var(--color-primary-text);
+  background-color: var(--color-violet);
+  border-radius: 0.25rem;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+
+  &:hover {
+    background-color: var(--color-dark-violet);
+  }
+}
+
+.button_filter,
+.button_filter_active {
+  display: flex;
+  gap: 0.5vh;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6vh 1.2vw;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-gray);
+  background: none;
+  border: 1px solid var(--color-gray-light);
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.button_filter:hover {
+  background-color: var(--color-filter-background);
+  border-color: var(--color-filter-border);
+}
+
+.button_filter_active {
+  color: var(--color-primary-text);
+  background-color: var(--color-violet);
+  border-color: var(--color-violet);
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.button_close {
+  position: absolute;
+  top: 1vh;
+  right: 1vw;
+  padding: 0.8vh;
+  font-size: 1.5rem;
+  color: var(--color-gray);
+  cursor: pointer;
+  outline: none;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-dark-violet);
+  }
+
+  &:focus {
+    color: var(--color-dark-violet);
+  }
+}
+
+.button_icon {
+  padding: 0.5vh;
+  font-size: 1.2rem;
+  color: var(--color-gray);
+  cursor: pointer;
+  outline: none;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-dark-violet);
+  }
+
+  &:focus {
+    color: var(--color-dark-violet);
+  }
+}

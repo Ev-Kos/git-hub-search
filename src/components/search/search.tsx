@@ -1,4 +1,7 @@
-import { forwardRef, type Dispatch, type FormEvent, type SetStateAction } from 'react';
+import { type Dispatch, type FormEvent, type SetStateAction } from 'react';
+
+import { Input } from '../input/input';
+import { Button } from '../button/button';
 
 import styles from './search.module.css';
 
@@ -9,29 +12,31 @@ type TSearchProps = {
   isLoading: boolean;
 };
 
-export const Search = forwardRef<HTMLInputElement, TSearchProps>(
-  ({ value, setValue, handleSearch, isLoading }, ref) => {
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      handleSearch();
-    };
+export const Search = ({ value, setValue, handleSearch, isLoading }: TSearchProps) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSearch();
+  };
 
-    return (
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.input_wrap}>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Введите ключевое слово для поиска..."
-            className={styles.input}
-            ref={ref}
-          />
-          <button type="submit" className={styles.button} disabled={isLoading}>
-            {isLoading ? 'Поиск' : 'Найти'}
-          </button>
-        </div>
-      </form>
-    );
-  },
-);
+  const handleClear = () => {
+    setValue('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.input_wrap}>
+        <Input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Введите ключевое слово для поиска..."
+          className={styles.input_search}
+          handleClear={handleClear}
+          sizeButton={20}
+        />
+        <Button view="primary" type="submit" disabled={isLoading}>
+          {isLoading ? 'Поиск' : 'Найти'}
+        </Button>
+      </div>
+    </form>
+  );
+};

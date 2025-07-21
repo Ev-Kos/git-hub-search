@@ -90,7 +90,7 @@ export type TRepository = {
   archived: boolean;
   disabled: boolean;
   open_issues_count: number;
-  license: unknown | null;
+  license?: { name: string };
   allow_forking: boolean;
   is_template: boolean;
   web_commit_signoff_required: boolean;
