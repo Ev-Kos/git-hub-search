@@ -7,7 +7,7 @@
 - Добавление репозиториев (по кнопке или drag'n'drop)
 - Фильтрация и сортировка полученных репозиториев
 
-## [Открыть проект]([https://chat-yandex.netlify.app/](https://ev-kos-githubsearch.netlify.app/))
+## [Открыть проект](https://ev-kos-githubsearch.netlify.app/)
 
 ## Используемые технологии
 
